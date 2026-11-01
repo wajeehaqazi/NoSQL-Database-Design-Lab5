@@ -1,0 +1,263 @@
+PART B – NEO4J GRAPH DATABASE
+
+Q11. Install and configure Neo4j. Create Student, Course and Department nodes.
+Code:
+
+Start Neo4j Desktop or Neo4j Server and open Neo4j Browser.
+// Create Student node
+CREATE (s:Student {
+id: 1,
+name: 'Aman'
+})
+
+// Create Course node
+CREATE (c:Course {
+name: 'BCA'
+})
+
+// Create Department node
+CREATE (d:Department {
+name: 'Computer Science'
+})
+
+// Create relationships
+MATCH (s:Student {id: 1}),
+(c:Course {name: 'BCA'}),
+(d:Department {name: 'Computer Science'})
+
+CREATE (s)-[:ENROLLED_IN]->(c),
+(c)-[:BELONGS_TO]->(d)
+
+// Display graph
+MATCH (n)
+RETURN n
+
+// Display relationships
+MATCH (a)-[r]->(b)
+RETURN a,r,b
+
+Output:
+Nodes Created:
+
+Student:
+ID = 1
+Name = Aman
+
+Course:
+BCA
+
+Department:
+Computer Science
+
+Relationships:
+
+Aman ---- ENROLLED_IN ----> BCA
+
+BCA ---- BELONGS_TO ----> Computer Science
+
+3 Nodes Created
+2 Relationships Created
+
+Q12. Create Social Network using Neo4j.
+Code:
+// Create persons
+CREATE (:Person {name:'Aman'})
+
+CREATE (:Person {name:'Riya'})
+
+CREATE (:Person {name:'Rahul'})
+
+// Create friendship
+MATCH (a:Person {name:'Aman'}),
+(r:Person {name:'Riya'})
+CREATE (a)-[:FRIENDS_WITH]->(r)
+
+// Create followers
+MATCH (r:Person {name:'Riya'}),
+(h:Person {name:'Rahul'})
+CREATE (h)-[:FOLLOWS]->(r)
+
+// Create workplace
+CREATE (:Company {name:'Google'})
+
+MATCH (a:Person {name:'Aman'}),
+(c:Company {name:'Google'})
+CREATE (a)-[:WORKS_AT]->(c)
+
+// Find friends
+MATCH (p:Person {name:'Aman'})
+-[:FRIENDS_WITH]->(f:Person)
+RETURN f.name;
+
+// Find followers
+MATCH (p:Person {name:'Riya'})
+<-[:FOLLOWS]-(f:Person)
+RETURN f.name;
+
+Output:
+Persons Created:
+
+Aman
+Riya
+Rahul
+
+Friend of Aman:
+Riya
+
+Followers of Riya:
+Rahul
+
+Workplace of Aman:
+Google
+
+Q13. Create Shopping/E-commerce Graph using Neo4j.
+Code:
+// Create customer
+CREATE (:Customer {
+id: 1,
+name: 'Aman'
+})
+
+// Create products
+CREATE (:Product {
+name: 'Laptop',
+price: 50000
+})
+
+CREATE (:Product {
+name: 'Mouse',
+price: 500
+})
+
+// Create category
+CREATE (:Category {
+name: 'Electronics'
+})
+
+// Create order
+CREATE (:Order {
+order_id: 101
+})
+
+// Create relationships
+MATCH (c:Customer {id: 1}),
+(p:Product {name: 'Laptop'}),
+(o:Order {order_id: 101}),
+(cat:Category {name: 'Electronics'})
+
+CREATE (c)-[:PLACED]->(o),
+(o)-[:CONTAINS]->(p),
+(p)-[:BELONGS_TO]->(cat)
+
+// Find purchased products
+MATCH (c:Customer {name:'Aman'})
+-[:PLACED]->(:Order)
+-[:CONTAINS]->(p:Product)
+
+RETURN p.name, p.price;
+
+Output:
+Customer:
+Aman
+
+Products:
+Laptop - 50000
+Mouse - 500
+
+Category:
+Electronics
+
+Order ID:
+101
+
+Purchased Product:
+Laptop
+
+Price:
+50000
+
+Q14. Demonstrate Transactions, Consistency and Availability in Neo4j.
+Code:
+
+Run these commands in Neo4j Cypher Shell.
+// Begin transaction
+:begin
+
+// Create customer
+CREATE (:Customer {
+id: 10,
+name: 'Aman'
+})
+
+// Create product
+CREATE (:Product {
+id: 20,
+name: 'Laptop'
+})
+
+// Create relationship
+MATCH (c:Customer {id:10}),
+(p:Product {id:20})
+
+CREATE (c)-[:BUYS]->(p)
+
+// Update product
+MATCH (p:Product {id:20})
+SET p.price = 50000
+
+// Commit transaction
+:commit
+
+// Display records
+MATCH (c:Customer)-[r:BUYS]->(p:Product)
+RETURN c,r,p;
+
+Delete operation:
+MATCH (c:Customer {id:10})
+DETACH DELETE c;
+
+Output:
+Transaction Started.
+
+Customer Created.
+Product Created.
+Relationship Created.
+Product Updated.
+
+Transaction Committed Successfully.
+
+Final Data:
+
+Customer: Aman
+Product: Laptop
+Price: 50000
+
+Relationship: BUYS
+
+After Delete:
+Customer deleted successfully.
+
+Explanation:
+- Transactions group database operations.
+- Consistency keeps data valid.
+- Availability means the database remains accessible when possible.
+- Commit saves changes.
+- Rollback cancels uncommitted changes.
+Q15. Develop Graph Database Application using Python and Neo4j.
+Step 1: Install Python library
+pip install neo4j
+
+Step 2: Python Code
+from neo4j import GraphDatabase# Connect to Neo4juri = "bolt://localhost:7687"username = "neo4j"password = "your_password"driver = GraphDatabase.driver(    uri,    auth=(username, password))# Create studentdef create_student(tx):    tx.run("""    CREATE (:Student {        id: 1,        name: 'Aman',        course: 'BCA'    })    """)# Read studentdef read_student(tx):    result = tx.run("""    MATCH (s:Student)    RETURN s.id AS id, s.name AS name,    s.course AS course    """)    for record in result:        print(record["id"],              record["name"],              record["course"])# Update student
+
+
+Output:
+After Insert:
+
+1 Aman BCA
+
+After Update:
+
+1 Aman MCA
+
+Student Deleted Successfully

@@ -1,0 +1,360 @@
+PART A – RIAK KV
+
+Q1. Install Riak KV and perform basic key-value operations on Students bucket.
+Code:
+# Create bucket
+curl -X PUT http://localhost:8098/buckets/students/props \
+-H "Content-Type: application/json" \
+-d '{"props":{"allow_mult":false}}'
+
+# Insert student
+curl -X PUT http://localhost:8098/buckets/students/keys/101 \
+-H "Content-Type: application/json" \
+-d '{"name":"Aman","course":"BCA","city":"Agra"}'
+
+# Retrieve student
+curl http://localhost:8098/buckets/students/keys/101
+
+# Update student
+curl -X PUT http://localhost:8098/buckets/students/keys/101 \
+-H "Content-Type: application/json" \
+-d '{"name":"Aman","course":"MCA","city":"Agra"}'
+
+# Delete student
+curl -X DELETE http://localhost:8098/buckets/students/keys/101
+
+Output:
+Bucket created successfully.
+
+Student inserted:
+{
+  "name": "Aman",
+  "course": "BCA",
+  "city": "Agra"
+}
+
+After Update:
+{
+  "name": "Aman",
+  "course": "MCA",
+  "city": "Agra"
+}
+
+Student deleted successfully.
+
+Q2. Create user_sessions bucket and store session information.
+Code:
+# Insert session
+curl -X PUT http://localhost:8098/buckets/user_sessions/keys/S101 \
+-H "Content-Type: application/json" \
+-d '{
+"session_id":"S101",
+"user_id":"U101",
+"login_time":"10:00 AM",
+"status":"Active"
+}'
+
+# Retrieve session
+curl http://localhost:8098/buckets/user_sessions/keys/S101
+
+Output:
+{
+  "session_id": "S101",
+  "user_id": "U101",
+  "login_time": "10:00 AM",
+  "status": "Active"
+}
+
+Q3. Store user profiles and preferences using Riak KV.
+Code:
+# Insert user profile
+curl -X PUT http://localhost:8098/buckets/profiles/keys/U101 \
+-H "Content-Type: application/json" \
+-d '{
+"name":"Aman",
+"email":"aman@gmail.com",
+"city":"Agra",
+"language":"English",
+"theme":"Dark",
+"notifications":true
+}'
+
+# Retrieve profile
+curl http://localhost:8098/buckets/profiles/keys/U101
+
+Output:
+{
+  "name": "Aman",
+  "email": "aman@gmail.com",
+  "city": "Agra",
+  "language": "English",
+  "theme": "Dark",
+  "notifications": true
+}
+
+Q4. Implement Shopping Cart using Riak KV.
+Code:
+# Add shopping cart
+curl -X PUT http://localhost:8098/buckets/cart/keys/U101 \
+-H "Content-Type: application/json" \
+-d '{
+"products":[
+{"id":1,"name":"Laptop","quantity":1,"price":50000},
+{"id":2,"name":"Mouse","quantity":2,"price":500}
+]
+}'
+
+# Retrieve cart
+curl http://localhost:8098/buckets/cart/keys/U101
+
+# Update quantity
+curl -X PUT http://localhost:8098/buckets/cart/keys/U101 \
+-H "Content-Type: application/json" \
+-d '{
+"products":[
+{"id":1,"name":"Laptop","quantity":2,"price":50000},
+{"id":2,"name":"Mouse","quantity":2,"price":500}
+]
+}'
+
+# Remove product by updating cart
+curl -X PUT http://localhost:8098/buckets/cart/keys/U101 \
+-H "Content-Type: application/json" \
+-d '{
+"products":[
+{"id":1,"name":"Laptop","quantity":2,"price":50000}
+]
+}'
+
+Output:
+Shopping cart created.
+
+Products:
+Laptop - Quantity: 1 - Price: 50000
+Mouse - Quantity: 2 - Price: 500
+
+After Update:
+Laptop - Quantity: 2
+
+After Remove:
+Mouse removed successfully.
+
+Q5. Demonstrate key-value data structure using Riak.
+Code:
+# Store string
+curl -X PUT http://localhost:8098/buckets/data/keys/name \
+-H "Content-Type: text/plain" \
+-d 'Aman'
+
+# Store JSON
+curl -X PUT http://localhost:8098/buckets/data/keys/student \
+-H "Content-Type: application/json" \
+-d '{"name":"Riya","course":"BCA"}'
+
+# Store list
+curl -X PUT http://localhost:8098/buckets/data/keys/subjects \
+-H "Content-Type: application/json" \
+-d '["Java","Python","NoSQL"]'
+
+# Retrieve values
+curl http://localhost:8098/buckets/data/keys/name
+
+curl http://localhost:8098/buckets/data/keys/student
+
+curl http://localhost:8098/buckets/data/keys/subjects
+
+Output:
+String:
+Aman
+
+JSON:
+{"name":"Riya","course":"BCA"}
+
+List:
+["Java","Python","NoSQL"]
+
+Explanation:
+- Bucket: Stores related keys.
+- Key: Identifies a particular record.
+- Value: Stores actual data.
+Q6. Demonstrate consistency using read and write quorum.
+Code:
+# Create bucket with quorum settings
+curl -X PUT http://localhost:8098/buckets/consistency/props \
+-H "Content-Type: application/json" \
+-d '{
+"props":{
+"n_val":3,
+"allow_mult":false
+}
+}'
+
+# Write operation
+curl -X PUT \
+"http://localhost:8098/buckets/consistency/keys/101?w=quorum&dw=quorum" \
+-H "Content-Type: application/json" \
+-d '{"name":"Aman","course":"BCA"}'
+
+# Read operation
+curl \
+"http://localhost:8098/buckets/consistency/keys/101?r=quorum"
+
+Output:
+Bucket created successfully.
+
+Write Operation:
+Data stored successfully.
+
+Read Operation:
+{
+  "name": "Aman",
+  "course": "BCA"
+}
+
+Explanation:
+- R = Read quorum.
+- W = Write quorum.
+- Quorum means the required number of replicas.
+- Riak uses replicas to improve data availability and consistency.
+Q7. Demonstrate scaling using Riak KV.
+Code:
+# Create multiple buckets
+curl -X PUT http://localhost:8098/buckets/users/props \
+-H "Content-Type: application/json" \
+-d '{"props":{"allow_mult":false}}'
+
+curl -X PUT http://localhost:8098/buckets/products/props \
+-H "Content-Type: application/json" \
+-d '{"props":{"allow_mult":false}}'
+
+# Insert user records
+curl -X PUT http://localhost:8098/buckets/users/keys/1 \
+-d '{"name":"Aman"}'
+
+curl -X PUT http://localhost:8098/buckets/users/keys/2 \
+-d '{"name":"Riya"}'
+
+# Insert product records
+curl -X PUT http://localhost:8098/buckets/products/keys/1 \
+-d '{"product":"Laptop"}'
+
+curl -X PUT http://localhost:8098/buckets/products/keys/2 \
+-d '{"product":"Mobile"}'
+
+# Retrieve records
+curl http://localhost:8098/buckets/users/keys/1
+
+curl http://localhost:8098/buckets/products/keys/1
+
+Output:
+Users Bucket:
+1 - Aman
+2 - Riya
+
+Products Bucket:
+1 - Laptop
+2 - Mobile
+
+Records inserted successfully.
+
+Explanation:
+- Riak distributes data across multiple nodes.
+- New nodes can be added to increase capacity.
+- This is called horizontal scaling.
+Q8. Implement transaction-like operations using Riak KV.
+Code:
+# Create shopping cart
+curl -X PUT http://localhost:8098/buckets/shop/keys/cart101 \
+-H "Content-Type: application/json" \
+-d '{
+"product":"Laptop",
+"quantity":1,
+"price":50000,
+"total":50000
+}'
+
+# Update quantity and total
+curl -X PUT http://localhost:8098/buckets/shop/keys/cart101 \
+-H "Content-Type: application/json" \
+-d '{
+"product":"Laptop",
+"quantity":2,
+"price":50000,
+"total":100000
+}'
+
+# Retrieve cart
+curl http://localhost:8098/buckets/shop/keys/cart101
+
+Output:
+{
+  "product": "Laptop",
+  "quantity": 2,
+  "price": 50000,
+  "total": 100000
+}
+
+Explanation:
+
+Riak KV does not provide traditional multi-record ACID transactions. Related values should be updated carefully by application logic.
+Q9. Implement Query-by-Data using Riak.
+Code:
+# Insert user records
+curl -X PUT http://localhost:8098/buckets/users/keys/U1 \
+-H "Content-Type: application/json" \
+-d '{"name":"Aman","city":"Agra","age":20}'
+
+curl -X PUT http://localhost:8098/buckets/users/keys/U2 \
+-H "Content-Type: application/json" \
+-d '{"name":"Riya","city":"Delhi","age":21}'
+
+curl -X PUT http://localhost:8098/buckets/users/keys/U3 \
+-H "Content-Type: application/json" \
+-d '{"name":"Rahul","city":"Agra","age":22}'
+
+# Retrieve user
+curl http://localhost:8098/buckets/users/keys/U1
+
+Output:
+User ID: U1
+Name: Aman
+City: Agra
+Age: 20
+
+Explanation: Application-level logic can retrieve records and filter them by city, age or preferences.
+Q10. Implement Set Operations using Riak.
+Code:
+# Create set
+curl -X PUT http://localhost:8098/types/sets/buckets/interests/keys/U1 \
+-H "Content-Type: application/json" \
+-d '{
+"add":["Music","Sports","Reading"]
+}'
+
+# Retrieve set
+curl http://localhost:8098/types/sets/buckets/interests/keys/U1
+
+# Add new element
+curl -X POST \
+http://localhost:8098/types/sets/buckets/interests/keys/U1 \
+-H "Content-Type: application/json" \
+-d '{"add":["Coding"]}'
+
+# Remove element
+curl -X POST \
+http://localhost:8098/types/sets/buckets/interests/keys/U1 \
+-H "Content-Type: application/json" \
+-d '{"remove":["Sports"]}'
+
+# Retrieve updated set
+curl http://localhost:8098/types/sets/buckets/interests/keys/U1
+
+Output:
+Initial Set:
+Music, Sports, Reading
+
+After Adding:
+Music, Sports, Reading, Coding
+
+After Removing:
+Music, Reading, Coding
